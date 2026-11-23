@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light" data-spacing="normal">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Apeperia: criação de aplicativos sob medida, acessíveis e econômicos para pequenos e médios empreendedores. Site projetado conforme diretrizes WCAG AAA para baixa visão.">
+  <title>Apeperia — Aplicativos na medida para o seu negócio</title>
+
+  <!-- Importação da fonte Atkinson Hyperlegible (criada pelo Braille Institute para baixa visão) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN para estrutura responsiva -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+  <!-- Link de salto rápido para leitores de tela e navegação por teclado -->
+  <a href="#conteudo-principal" class="skip-link">Pular para o conteúdo principal</a>
+
+  <!-- Região de anúncios dinâmicos (aria-live) para feedback imediato sem pop-ups invasivos -->
+  <div id="a11y-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ========================================================================
+       1. BARRA SUPERIOR DE ACESSIBILIDADE (FIXA / DESTACADA NO TOPO)
+       ======================================================================== -->
+  <div class="a11y-toolbar sticky top-0 z-50 px-4 py-3" role="region" aria-label="Barra de ferramentas de acessibilidade para baixa visão">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Identificador da barra -->
+      <div class="flex items-center gap-2 font-bold">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        <span>Acessibilidade:</span>
+      </div>
+
+      <!-- Grupo de controles visuais e sonoros -->
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        
+        <!-- Controles de tamanho de fonte -->
+        <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Controle de tamanho do texto">
+          <button type="button" id="btn-font-decrease" class="toolbar-btn" aria-label="Diminuir tamanho da fonte">
+            A-
+          </button>
+          <button type="button" id="btn-font-reset" class="toolbar-btn" aria-label="Restaurar tamanho padrão da fonte para 20 pixels">
+            A <span id="font-size-indicator" class="text-sm underline ml-1">(20px)</span>
+          </button>
+          <button type="button" id="btn-font-increase" class="toolbar-btn" aria-label="Aumentar tamanho da fonte">
+            A+
+          </button>
+        </div>
+
+        <!-- Alternador de Tema de Alto Contraste -->
+        <button type="button" id="btn-theme-toggle" class="toolbar-btn" aria-pressed="false">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 3a9 9 0 0 0 0 18V3z" fill="currentColor"></path>
+          </svg>
+          <span id="theme-btn-label">Alto Contraste Escuro</span>
+        </button>
+
+        <!-- Botão de Espaçamento Ampliado -->
+        <button type="button" id="btn-spacing-toggle" class="toolbar-btn" aria-pressed="false">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+          <span id="spacing-btn-label">Espaçamento Ampliado</span>
+        </button>
+
+        <!-- Botão Ouvir Página / Parar Leitura (Web Speech API) -->
+        <button type="button" id="btn-tts-page" class="toolbar-btn" aria-pressed="false">
+          <svg id="tts-icon-play" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <span id="tts-btn-label">Ouvir Página</span>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de status de leitura em voz alta (exibida apenas quando o áudio estiver ativo) -->
+  <div id="tts-status-bar" class="hidden px-4 py-3 border-b-4" style="background-color: var(--bg-surface-elevated); border-color: var(--border-color);" role="status" aria-live="polite">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <p class="font-bold m-0" id="tts-status-text">Leitura em voz alta ativa.</p>
+      <button type="button" id="btn-tts-stop-bar" class="btn-primary">
+        Parar Leitura Agora
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       2. CABEÇALHO (<header>)
+       ======================================================================== -->
+  <header class="px-4 py-6 border-b-4" style="border-color: var(--border-color); background-color: var(--bg-page);">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      
+      <!-- Logotipo textual e vetorial SVG de alto contraste da Apeperia -->
+      <a href="#conteudo-principal" class="inline-flex items-center gap-4 p-2 rounded-lg no-underline group self-start" aria-label="Apeperia — Página inicial">
+        <svg width="56" height="56" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- Moldura de smartphone geométrica de traço grosso -->
+          <rect x="14" y="4" width="36" height="56" rx="8" stroke="currentColor" stroke-width="5" fill="none"/>
+          <!-- Tela interna com símbolo de aplicativo/crescimento -->
+          <path d="M24 38L32 22L40 38" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="26" y1="33" x2="38" y2="33" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/>
+          <!-- Botão inferior do aparelho -->
+          <circle cx="32" cy="51" r="2.8" fill="currentColor"/>
+        </svg>
+        <div>
+          <span class="block text-2xl sm:text-3xl font-bold tracking-wide" style="color: var(--heading-color);">Apeperia</span>
+          <span class="block text-sm font-bold" style="color: var(--text-secondary);">Apps Acessíveis para Negócios</span>
+        </div>
+      </a>
+
+      <!-- Menu de navegação semântico com alvos grandes (>= 52px) e sublinhado explícito -->
+      <nav aria-label="Navegação principal do site">
+        <ul class="flex flex-wrap items-center gap-3 list-none p-0 m-0">
+          <li><a href="#sobre" class="nav-link">Sobre</a></li>
+          <li><a href="#planos" class="nav-link">Planos</a></li>
+          <li><a href="#destaques" class="nav-link">Destaques</a></li>
+          <li><a href="#diferenciais" class="nav-link">Diferenciais</a></li>
+          <li><a href="#institucional" class="nav-link">Institucional</a></li>
+          <li><a href="#contato" class="nav-link">Contato</a></li>
+        </ul>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       CONTEÚDO PRINCIPAL (<main>)
+       ======================================================================== -->
+  <main id="conteudo-principal" tabindex="-1">
+
+    <!-- ======================================================================
+         3. SEÇÃO CHAMADA (HERO)
+         ====================================================================== -->
+    <section id="chamada" class="px-4 py-12 sm:py-16" style="background-color: var(--bg-surface);">
+      <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <div class="lg:col-span-8 space-y-6">
+          <p class="inline-block px-4 py-1.5 font-bold rounded-md border-2" style="border-color: var(--border-color); background-color: var(--bg-page);">
+            Agência de Aplicativos Sob Medida
+          </p>
+
+          <h1>Aplicativos na medida para o seu negócio</h1>
+
+          <p class="text-lg sm:text-xl">
+            A Apeperia transforma as ideias de pequenos e médios empreendedores em aplicativos modernos, rápidos, econômicos e projetados desde o início com acessibilidade real para todos os seus clientes.
+          </p>
+
+          <div class="pt-2 flex flex-wrap items-center gap-4">
+            <a href="#planos" class="btn-primary text-lg">
+              <span>Conheça nossos planos</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <polyline points="19 12 12 19 5 12"></polyline>
+              </svg>
+            </a>
+
+            <button type="button" class="btn-secondary" data-tts-target="chamada">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+              <span>Ouvir apresentação</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Cartão resumo de compromissos com leitura direta -->
+        <aside class="lg:col-span-4 solid-card p-6 sm:p-8" style="background-color: var(--bg-page);" aria-label="Resumo rápido de vantagens">
+          <h2 class="text-xl mb-4">Por que escolher a Apeperia?</h2>
+          <ul class="space-y-4 list-none p-0 m-0">
+            <li class="flex items-start gap-3">
+              <svg class="shrink-0 mt-1" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span><strong>Preço justo e previsível:</strong> planos mensais sem surpresas no orçamento.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="shrink-0 mt-1" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span><strong>Multiplataforma:</strong> seu aplicativo funcionando no Android, iOS e Web.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="shrink-0 mt-1" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span><strong>Acessibilidade nativa:</strong> compatível com leitores de tela e ampliação.</span>
+            </li>
+          </ul>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         4. SEÇÃO PLANOS (O CORAÇÃO DA APEPERIA)
+         ====================================================================== -->
+    <section id="planos" class="px-4 py-14 sm:py-16 section-divider">
+      <div class="max-w-7xl mx-auto">
+        
+        <div class="mb-10 space-y-4">
+          <h2>Planos da Apeperia</h2>
+          <p>
+            Escolha o plano ideal para o momento da sua empresa. Todos os planos incluem publicação nas lojas, manutenção contínua e suporte técnico especializado.
+          </p>
+        </div>
+
+        <!-- Grid responsivo de 3 planos com leitura vertical clara e bordas de 3px -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+
+          <!-- PLANO START -->
+          <article id="card-plano-start" class="solid-card p-6 sm:p-8 flex flex-col justify-between gap-6">
+            <div class="space-y-5">
+              <div class="border-b-3 pb-4" style="border-bottom: 3px solid var(--border-color);">
+                <span class="inline-block font-bold uppercase tracking-wider text-sm mb-1">Plano Inicial</span>
+                <h3 class="text-2xl">Plano Start</h3>
+                <p class="mt-3 text-3xl font-bold" style="color: var(--heading-color);">
+                  R$ 500<span class="text-lg font-normal">/mês</span>
+                </p>
+              </div>
+
+              <ul class="space-y-3.5 list-none p-0 m-0">
+                <li class="flex items-start gap-3">
+                  <svg class="shrink-0 mt-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span><strong>5 manutenções mensais</strong> garantidas</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <svg class="shrink-0 mt-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span><strong>App SEO otimizado</strong> para buscas</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <svg class="shrink-0 mt-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span><strong>1 sistema operacional</strong> (Android ou iOS)</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="space-y-3 pt-4 border-t-2" style="border-color: var(--border-subtle);">
+              <button type="button" class="btn-primary w-full" data-select-plan="Plano Start — R$ 500/mês">
+                Assinar plano Start
+              </button>
+              <button type="button" class="btn-secondary w-full" data-tts-plan="Plano Start. Valor de 500 reais por mês. Inclui: 5 manutenções mensais garantidas, App SEO otimizado para buscas e 1 sistema operacional, Android ou iOS.">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                <span>Ouvir detalhes do plano</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- PLANO MEGA -->
+          <article id="card-plano-mega" class="solid-card p-6 sm:p-8 flex flex-col justify-between gap-6">
+            <div class="space-y-5">
+              <div class="border-b-3 pb-4" style="border-bottom: 3px solid var(--border-color);">
+                <span class="inline-block font-bold uppercase tracking-wider text-sm mb-1">Plano Intermediário</span>
+                <h3 class="text-2xl">Plano Mega</h3>
+                <p class="mt-3 text-3xl font-bold" style="color: var(--heading-color);">
+                  R$ 1.000<span class="text-lg font-normal">/mês</span>
+                </p>
+              </div>
+
+              <ul class="space-y-3.5 list-none p-0 m-0">
+                <li class="flex items-start gap-3">
+                  <svg class="shrink-0 mt-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span><strong>10 manutenções mensais</strong> garantidas</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <svg class="shrink-0 mt-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span><strong>App SEO otimizado</strong> para buscas</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <svg class="shrink-0 mt-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span><strong>2 sistemas operacionais</strong> (Android e iOS)</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="space-y-3 pt-4 border-t-2" style="border-color: var(--border-subtle);">
+              <button type="button" class="btn-primary w-full" data-select-plan="Plano Mega — R$ 1.000/mês">
+                Assinar plano Mega
+              </button>
+              <button type="button" class="btn-secondary w-full" data-tts-plan="Plano Mega. Valor de 1.000 reais por mês. Inclui: 10 manutenções mensais garantidas, App SEO otimizado para buscas e 2 sistemas operacionais, Android e iOS.">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                <span>Ouvir detalhes do plano</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- PLANO ULTRA (DESTAQUE MAIS COMPLETO) -->
+          <article id="card-plano-ultra" class="solid-card-elevated p-6 sm:p-8 flex flex-col justify-between gap-6">
+            <div class="space-y-5">
+              <!-- Selo textual e icônico explícito (não depende apenas de cor) -->
+              <div>
+                <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md font-bold text-sm uppercase tracking-wider" style="background-color: var(--badge-bg); color: var(--badge-text);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                  <span>Mais Completo</span>
+                </span>
+              </div>
+
+              <div class="pb-4" style="border-bottom: 3px solid var(--border-color);">
+                <h3 class="text-2xl">Plano Ultra</h3>
+                <p class="mt-3 text-3xl font-bold" style="color: var(--heading-color);">
+                  R$ 1.500<span class="text-lg font-normal">/mês</span>
+                </p>
+              </div>
+
+              <ul class="space-y-3.5 list-none p-0 m-0">
+                <li class="flex items-start gap-3">
+                  <svg class="shrink-0 mt-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span><strong>20 manutenções mensais</strong> garantidas</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <svg class="shrink-0 mt-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span><strong>App SEO otimizado</strong> para buscas</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <svg class="shrink-0 mt-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span><strong>4 sistemas operacionais</strong> (Android, iOS, Web e Desktop)</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <svg class="shrink-0 mt-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span><strong>Atendimento prioritário 24h</strong> dedicado</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="space-y-3 pt-4 border-t-2" style="border-color: var(--border-subtle);">
+              <button type="button" class="btn-primary w-full" data-select-plan="Plano Ultra — R$ 1.500/mês">
+                Assinar plano Ultra
+              </button>
+              <button type="button" class="btn-secondary w-full" data-tts-plan="Plano Ultra, destaque Mais Completo. Valor de 1.500 reais por mês. Inclui: 20 manutenções mensais garantidas, App SEO otimizado, 4 sistemas operacionais e atendimento prioritário 24 horas.">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                <span>Ouvir detalhes do plano</span>
+              </button>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         5. SEÇÃO DIFERENCIAIS
+         ====================================================================== -->
+    <section id="diferenciais" class="px-4 py-14 sm:py-16 section-divider" style="background-color: var(--bg-surface);">
+      <div class="max-w-7xl mx-auto">
+        
+        <div class="mb-10 space-y-4">
+          <h2>Nossos Diferenciais</h2>
+          <p>
+            Trabalhamos com processos transparentes para que você acompanhe cada etapa da criação do seu aplicativo com segurança e tranquilidade.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <!-- Pilar 1: Tempo -->
+          <div class="solid-card p-6 sm:p-8 space-y-4" style="background-color: var(--bg-page);">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-lg border-3" style="border: 3px solid var(--border-color); background-color: var(--bg-surface);">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"></circle>
+                <polyline points="12 7 12 12 15.5 14"></polyline>
+              </svg>
+            </div>
+            <h3>Tempo</h3>
+            <p>
+              Tempo é dinheiro! Trabalhamos em ritmo acelerado, atendendo rigorosamente aos prazos combinados.
+            </p>
+          </div>
+
+          <!-- Pilar 2: Foco -->
+          <div class="solid-card p-6 sm:p-8 space-y-4" style="background-color: var(--bg-page);">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-lg border-3" style="border: 3px solid var(--border-color); background-color: var(--bg-surface);">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"></circle>
+                <circle cx="12" cy="12" r="4"></circle>
+                <line x1="12" y1="2" x2="12" y2="5"></line>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+                <line x1="2" y1="12" x2="5" y2="12"></line>
+                <line x1="19" y1="12" x2="22" y2="12"></line>
+              </svg>
+            </div>
+            <h3>Foco</h3>
+            <p>
+              Focamos no seu empreendimento! Oferecemos serviços de alta qualidade com preços que cabem no orçamento.
+            </p>
+          </div>
+
+          <!-- Pilar 3: Especialistas -->
+          <div class="solid-card p-6 sm:p-8 space-y-4" style="background-color: var(--bg-page);">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-lg border-3" style="border: 3px solid var(--border-color); background-color: var(--bg-surface);">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <polyline points="9 12 11 14 15 10"></polyline>
+              </svg>
+            </div>
+            <h3>Especialistas</h3>
+            <p>
+              Equipe experiente e especializada! Testamos cada funcionalidade e acessibilidade antes do lançamento.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         6. SEÇÃO SOBRE
+         ====================================================================== -->
+    <section id="sobre" class="px-4 py-14 sm:py-16 section-divider">
+      <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        
+        <div class="lg:col-span-7 space-y-6">
+          <h2>Sobre a Apeperia</h2>
+          <p>
+            Criamos aplicativos personalizados para todas as pessoas e negócios! A Apeperia nasceu com a missão de democratizar a tecnologia móvel para pequenos e médios empreendedores que precisam expandir suas vendas e fidelizar clientes.
+          </p>
+          <p>
+            A manutenção do aplicativo não precisa ser um custo extra imprevisível: na Apeperia, esse serviço já está incluído dentro do plano contratado, garantindo tranquilidade e segurança contínua.
+          </p>
+          <p>
+            Contamos com uma equipe especializada e exclusiva para projetos multiplataforma, desenvolvendo soluções nativas para <strong>Android</strong>, <strong>iOS</strong> e <strong>Web</strong> com foco rigoroso em legibilidade, alto contraste e navegação assistiva.
+          </p>
+
+          <!-- Lista explícita de plataformas suportadas -->
+          <div class="pt-2">
+            <h3 class="text-xl mb-3">Compatibilidade Garantida:</h3>
+            <ul class="flex flex-wrap gap-3 list-none p-0 m-0">
+              <li class="px-4 py-2 font-bold rounded-md border-3" style="border: 3px solid var(--border-color); background-color: var(--bg-surface);">
+                Sistema Android
+              </li>
+              <li class="px-4 py-2 font-bold rounded-md border-3" style="border: 3px solid var(--border-color); background-color: var(--bg-surface);">
+                Sistema iOS (iPhone e iPad)
+              </li>
+              <li class="px-4 py-2 font-bold rounded-md border-3" style="border: 3px solid var(--border-color); background-color: var(--bg-surface);">
+                Aplicativos Web Responsivos
+              </li>
+              <li class="px-4 py-2 font-bold rounded-md border-3" style="border: 3px solid var(--border-color); background-color: var(--bg-surface);">
+                Acessibilidade Nativa WCAG
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Ilustração SVG esquemática de alto contraste com role="img", aria-label e legenda visível -->
+        <figure class="lg:col-span-5 solid-card p-6 space-y-4">
+          <svg
+            role="img"
+            aria-label="Diagrama esquemático de alto contraste mostrando um aplicativo central da Apeperia conectado a três dispositivos: celular Android, celular iOS e computador Web, todos com símbolo de verificação de acessibilidade."
+            viewBox="0 0 420 320"
+            class="w-full h-auto"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <!-- Moldura externa -->
+            <rect x="6" y="6" width="408" height="308" rx="14" stroke="currentColor" stroke-width="4" fill="none"/>
+
+            <!-- Núcleo Central: Apeperia App -->
+            <rect x="135" y="26" width="150" height="72" rx="10" stroke="currentColor" stroke-width="4" fill="none"/>
+            <text x="210" y="58" text-anchor="middle" fill="currentColor" font-size="18" font-weight="bold" font-family="Atkinson Hyperlegible, sans-serif">APEPERIA</text>
+            <text x="210" y="82" text-anchor="middle" fill="currentColor" font-size="15" font-weight="bold" font-family="Atkinson Hyperlegible, sans-serif">Código Único</text>
+
+            <!-- Linhas de conexão espessas -->
+            <line x1="210" y1="98" x2="210" y2="145" stroke="currentColor" stroke-width="4"/>
+            <line x1="75" y1="145" x2="345" y2="145" stroke="currentColor" stroke-width="4"/>
+            <line x1="75" y1="145" x2="75" y2="180" stroke="currentColor" stroke-width="4"/>
+            <line x1="210" y1="145" x2="210" y2="180" stroke="currentColor" stroke-width="4"/>
+            <line x1="345" y1="145" x2="345" y2="180" stroke="currentColor" stroke-width="4"/>
+
+            <!-- Bloco 1: Android -->
+            <rect x="22" y="180" width="106" height="108" rx="10" stroke="currentColor" stroke-width="4" fill="none"/>
+            <polyline points="62,215 72,225 90,205" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="75" y="256" text-anchor="middle" fill="currentColor" font-size="16" font-weight="bold" font-family="Atkinson Hyperlegible, sans-serif">Android</text>
+            <text x="75" y="276" text-anchor="middle" fill="currentColor" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">Acessível</text>
+
+            <!-- Bloco 2: iOS -->
+            <rect x="157" y="180" width="106" height="108" rx="10" stroke="currentColor" stroke-width="4" fill="none"/>
+            <polyline points="197,215 207,225 225,205" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="210" y="256" text-anchor="middle" fill="currentColor" font-size="16" font-weight="bold" font-family="Atkinson Hyperlegible, sans-serif">iOS</text>
+            <text x="210" y="276" text-anchor="middle" fill="currentColor" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">Acessível</text>
+
+            <!-- Bloco 3: Web -->
+            <rect x="292" y="180" width="106" height="108" rx="10" stroke="currentColor" stroke-width="4" fill="none"/>
+            <polyline points="332,215 342,225 360,205" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="345" y="256" text-anchor="middle" fill="currentColor" font-size="16" font-weight="bold" font-family="Atkinson Hyperlegible, sans-serif">Web</text>
+            <text x="345" y="276" text-anchor="middle" fill="currentColor" font-size="14" font-family="Atkinson Hyperlegible, sans-serif">Acessível</text>
+          </svg>
+
+          <figcaption class="font-bold text-base pt-2 border-t-2" style="border-color: var(--border-subtle);">
+            Ilustração esquemática: A arquitetura da Apeperia entrega seu aplicativo simultaneamente para Android, iOS e Web com padrões nativos de acessibilidade.
+          </figcaption>
+        </figure>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         7. SEÇÃO DESTAQUES (DICAS PARA EMPREENDEDORES)
+         ====================================================================== -->
+    <section id="destaques" class="px-4 py-14 sm:py-16 section-divider" style="background-color: var(--bg-surface);">
+      <div class="max-w-7xl mx-auto space-y-10">
+        
+        <div class="space-y-4">
+          <h2>Destaques e Dicas para Empreendedores</h2>
+          <p>
+            Conteúdos práticos preparados pela nossa equipe para ajudar você a planejar, divulgar e fazer seu aplicativo crescer com sucesso.
+          </p>
+        </div>
+
+        <!-- 2 artigos em destaque sobre fundo sólido de alto contraste (zero texto sobre fotos) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
+          <!-- Artigo 1 -->
+          <article class="solid-card p-6 sm:p-8 space-y-5" style="background-color: var(--bg-page);">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 font-bold text-sm rounded border-2" style="border-color: var(--border-color); background-color: var(--bg-surface);">
+                Guia Prático • 4 min de leitura
+              </span>
+            </div>
+
+            <h3>Conheça as primeiras etapas para a criação de um aplicativo de sucesso</h3>
+
+            <p>
+              Antes de escrever a primeira linha de código, definir claramente o problema que seu cliente enfrenta e mapear as funções essenciais evita gastos desnecessários e acelera o lançamento.
+            </p>
+
+            <!-- Conteúdo completo expansível inline (mantém orientação espacial para usuários de lupa de tela) -->
+            <div id="artigo-1-completo" class="hidden pt-4 border-t-2 space-y-4" style="border-color: var(--border-subtle);">
+              <p>
+                <strong>1. Mapeie a jornada do seu cliente:</strong> Liste as 3 ações mais importantes que o usuário precisa realizar no aplicativo, como consultar catálogo, fazer um pedido ou agendar horário.
+              </p>
+              <p>
+                <strong>2. Priorize a simplicidade e o contraste:</strong> Telas limpas com botões grandes e textos diretos aumentam a taxa de conclusão de compras para todos os públicos, incluindo pessoas com baixa visão.
+              </p>
+              <p>
+                <strong>3. Lance uma versão inicial validada:</strong> Comece com as funcionalidades principais, ouça o retorno dos seus primeiros clientes e evolua continuamente com as manutenções mensais da Apeperia.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3 pt-2">
+              <button type="button" class="btn-primary" aria-expanded="false" aria-controls="artigo-1-completo" data-toggle-article="artigo-1-completo">
+                Ler artigo completo
+              </button>
+              <button type="button" class="btn-secondary" data-tts-plan="Artigo: Conheça as primeiras etapas para a criação de um aplicativo de sucesso. Passo 1: Mapeie a jornada do seu cliente, listando as 3 ações mais importantes. Passo 2: Priorize a simplicidade, botões grandes e alto contraste. Passo 3: Lance uma versão inicial validada e evolua com as manutenções mensais da Apeperia.">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                <span>Ouvir artigo</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Artigo 2 -->
+          <article class="solid-card p-6 sm:p-8 space-y-5" style="background-color: var(--bg-page);">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 font-bold text-sm rounded border-2" style="border-color: var(--border-color); background-color: var(--bg-surface);">
+                Identidade Visual • 3 min de leitura
+              </span>
+            </div>
+
+            <h3>Veja dicas essenciais de fotografia e identidade visual para divulgar seu negócio</h3>
+
+            <p>
+              Boas fotos dos seus produtos e uma identidade visual nítida aumentam a confiança do consumidor e valorizam sua marca nas lojas de aplicativos e redes sociais.
+            </p>
+
+            <!-- Conteúdo completo expansível inline -->
+            <div id="artigo-2-completo" class="hidden pt-4 border-t-2 space-y-4" style="border-color: var(--border-subtle);">
+              <p>
+                <strong>1. Use fundos limpos e boa iluminação:</strong> Fotografe seus produtos perto de uma janela com luz natural e fundo neutro para destacar cada detalhe sem ruído visual.
+              </p>
+              <p>
+                <strong>2. Nunca coloque texto direto sobre fotografias complexas:</strong> Sempre utilize caixas de cor sólida por trás dos títulos para garantir leitura confortável em qualquer celular.
+              </p>
+              <p>
+                <strong>3. Descreva suas imagens (Texto Alternativo):</strong> Incluir descrições claras nas imagens do aplicativo melhora o ranqueamento nas buscas (SEO) e permite que clientes cegos ou com baixa visão conheçam seus produtos.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3 pt-2">
+              <button type="button" class="btn-primary" aria-expanded="false" aria-controls="artigo-2-completo" data-toggle-article="artigo-2-completo">
+                Ler artigo completo
+              </button>
+              <button type="button" class="btn-secondary" data-tts-plan="Artigo: Veja dicas essenciais de fotografia e identidade visual para divulgar seu negócio. Dica 1: Use fundos limpos e boa iluminação natural. Dica 2: Nunca coloque texto direto sobre fotografias complexas, use fundos sólidos de alto contraste. Dica 3: Adicione descrições textuais nas imagens para melhorar o SEO e a acessibilidade.">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                <span>Ouvir artigo</span>
+              </button>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- Formulário simples e acessível para Receber novidades por e-mail -->
+        <div class="solid-card p-6 sm:p-8" style="background-color: var(--bg-page);">
+          <div class="max-w-3xl space-y-4">
+            <h3>Receber novidades por e-mail</h3>
+            <p>
+              Cadastre seu e-mail para receber dicas mensais de empreendedorismo digital e acessibilidade. Sem envio de spam.
+            </p>
+
+            <form id="newsletter-form" class="space-y-4" novalidate>
+              <div>
+                <label for="newsletter-email" class="block font-bold mb-2">
+                  Seu melhor e-mail (obrigatório)
+                </label>
+                <div class="flex flex-col sm:flex-row gap-4">
+                  <input
+                    type="email"
+                    id="newsletter-email"
+                    name="newsletter-email"
+                    class="form-input sm:flex-1"
+                    placeholder="exemplo@suaempresa.com.br"
+                    required
+                    aria-required="true"
+                    aria-describedby="newsletter-feedback"
+                  >
+                  <button type="submit" class="btn-primary shrink-0">
+                    Receber novidades por e-mail
+                  </button>
+                </div>
+              </div>
+
+              <div id="newsletter-feedback" role="status" aria-live="polite" class="hidden"></div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         8. SEÇÃO INSTITUCIONAL & CONTATO
+         ====================================================================== -->
+    <section id="institucional" class="px-4 py-14 sm:py-16 section-divider">
+      <div class="max-w-7xl mx-auto space-y-12">
+
+        <div class="space-y-4">
+          <h2>Institucional e Contato</h2>
+          <p>
+            Conheça nossa sede, ouça ou leia nossa apresentação institucional e envie sua mensagem para contratar um plano ou tirar dúvidas.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+          <!-- Coluna Esquerda: Dados Institucionais + Player Acessível com Transcrição -->
+          <div class="lg:col-span-5 space-y-8">
+            
+            <!-- Dados Institucionais -->
+            <div class="solid-card p-6 sm:p-8 space-y-5">
+              <h3>Onde estamos e canais diretos</h3>
+
+              <address class="not-italic space-y-4">
+                <div>
+                  <span class="block font-bold">Endereço da Sede:</span>
+                  <p class="mt-1">Rua Vergueiro, 3185 - Vila Mariana, São Paulo - SP</p>
+                </div>
+
+                <div>
+                  <span class="block font-bold">Telefone Comercial (clique para ligar):</span>
+                  <p class="mt-1">
+                    <a href="tel:+551155712751" class="inline-link text-xl sm:text-2xl">
+                      (11) 5571-2751
+                    </a>
+                  </p>
+                </div>
+
+                <div>
+                  <span class="block font-bold">E-mail Institucional:</span>
+                  <p class="mt-1">
+                    <a href="mailto:contato@apeperia.com.br" class="inline-link break-all">
+                      contato@apeperia.com.br
+                    </a>
+                  </p>
+                </div>
+              </address>
+            </div>
+
+            <!-- Player Acessível de Apresentação Institucional com Transcrição Completa Visível -->
+            <div class="solid-card p-6 sm:p-8 space-y-5" aria-label="Apresentação institucional acessível">
+              <h3>Apresentação Institucional da Apeperia</h3>
+              <p class="text-base">
+                Ouça a mensagem institucional em áudio ou acompanhe a transcrição completa logo abaixo.
+              </p>
+
+              <!-- Controles do Player Simulado/TTS -->
+              <div class="p-4 rounded-lg border-3 space-y-3" style="border: 3px solid var(--border-color); background-color: var(--bg-page);">
+                <div class="flex flex-wrap items-center gap-3">
+                  <button type="button" id="btn-institutional-audio" class="btn-primary w-full sm:w-auto" aria-pressed="false">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <span id="institutional-audio-label">Reproduzir Apresentação em Áudio</span>
+                  </button>
+                </div>
+                <p id="institutional-audio-status" class="text-sm font-bold m-0" role="status" aria-live="polite">
+                  Duração estimada: 40 segundos • Áudio em Português (Brasil).
+                </p>
+              </div>
+
+              <!-- Transcrição Textual Completa Sempre Visível -->
+              <div id="institutional-transcript-box" class="p-4 rounded-lg border-2 space-y-3" style="border-color: var(--border-subtle); background-color: var(--bg-page);">
+                <h4 class="text-lg">Transcrição completa da apresentação:</h4>
+                <p id="institutional-transcript-text" class="text-base">
+                  "Olá, empreendedor e empreendedora! Na Apeperia, acreditamos que todo pequeno e médio negócio merece ter um aplicativo próprio, profissional e acessível. Cuidamos de todo o planejamento, design de alto contraste, desenvolvimento para Android e iOS e manutenção mensal com preço fixo. Nossa equipe acompanha você em cada passo para transformar clientes em fãs da sua marca. Entre em contato conosco e escolha o plano ideal para crescer!"
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Coluna Direita: Formulário de Contato / Contratação de Plano -->
+          <div id="contato" class="lg:col-span-7 solid-card p-6 sm:p-8 space-y-6">
+            <div class="space-y-2">
+              <h3>Contrate seu Plano ou Fale Conosco</h3>
+              <p>
+                Preencha os campos abaixo. Todos os rótulos estão visíveis acima de cada campo e nossa equipe responderá em até 1 dia útil.
+              </p>
+            </div>
+
+            <!-- Caixa de feedback acessível (erros de validação ou confirmação de envio) -->
+            <div id="contact-form-feedback" class="hidden" role="alert" aria-live="assertive"></div>
+
+            <form id="contact-form" class="space-y-6" novalidate>
+              
+              <!-- Campo 1: Nome completo -->
+              <div>
+                <label for="nome" class="block font-bold mb-2">
+                  Nome completo (obrigatório)
+                </label>
+                <input
+                  type="text"
+                  id="nome"
+                  name="nome"
+                  class="form-input"
+                  autocomplete="name"
+                  placeholder="Digite seu nome e sobrenome"
+                  required
+                  aria-required="true"
+                  aria-describedby="erro-nome"
+                >
+                <p id="erro-nome" class="hidden mt-2 font-bold" style="color: var(--accent-secondary);"></p>
+              </div>
+
+              <!-- Campo 2: E-mail -->
+              <div>
+                <label for="email" class="block font-bold mb-2">
+                  E-mail para contato (obrigatório)
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="form-input"
+                  autocomplete="email"
+                  placeholder="nome@empresa.com.br"
+                  required
+                  aria-required="true"
+                  aria-describedby="erro-email"
+                >
+                <p id="erro-email" class="hidden mt-2 font-bold" style="color: var(--accent-secondary);"></p>
+              </div>
+
+              <!-- Campo 3: Telefone / WhatsApp -->
+              <div>
+                <label for="telefone" class="block font-bold mb-2">
+                  Telefone ou WhatsApp com DDD (obrigatório)
+                </label>
+                <input
+                  type="tel"
+                  id="telefone"
+                  name="telefone"
+                  class="form-input"
+                  autocomplete="tel"
+                  placeholder="(11) 99999-9999"
+                  required
+                  aria-required="true"
+                  aria-describedby="erro-telefone"
+                >
+                <p id="erro-telefone" class="hidden mt-2 font-bold" style="color: var(--accent-secondary);"></p>
+              </div>
+
+              <!-- Campo 4: Plano de interesse -->
+              <div>
+                <label for="plano-escolhido" class="block font-bold mb-2">
+                  Plano de interesse
+                </label>
+                <select id="plano-escolhido" name="plano-escolhido" class="form-input">
+                  <option value="Ainda não escolhi / Dúvida geral">Ainda não escolhi / Dúvida geral</option>
+                  <option value="Plano Start — R$ 500/mês">Plano Start — R$ 500/mês (5 manutenções, 1 sistema)</option>
+                  <option value="Plano Mega — R$ 1.000/mês">Plano Mega — R$ 1.000/mês (10 manutenções, Android e iOS)</option>
+                  <option value="Plano Ultra — R$ 1.500/mês">Plano Ultra — R$ 1.500/mês (20 manutenções, 4 sistemas, Suporte 24h)</option>
+                </select>
+              </div>
+
+              <!-- Campo 5: Mensagem -->
+              <div>
+                <label for="mensagem" class="block font-bold mb-2">
+                  Conte sobre o seu negócio ou aplicativo desejado (obrigatório)
+                </label>
+                <textarea
+                  id="mensagem"
+                  name="mensagem"
+                  rows="4"
+                  class="form-input"
+                  placeholder="Exemplo: Tenho uma padaria de bairro e gostaria de um aplicativo simples para encomendas."
+                  required
+                  aria-required="true"
+                  aria-describedby="erro-mensagem"
+                ></textarea>
+                <p id="erro-mensagem" class="hidden mt-2 font-bold" style="color: var(--accent-secondary);"></p>
+              </div>
+
+              <div class="pt-2">
+                <button type="submit" class="btn-primary w-full sm:w-auto text-lg">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                  <span>Enviar solicitação de contato</span>
+                </button>
+              </div>
+
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       9. RODAPÉ (<footer>)
+       ======================================================================== -->
+  <footer class="px-4 py-12 section-divider" style="background-color: var(--bg-surface);">
+    <div class="max-w-7xl mx-auto space-y-10">
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+        
+        <!-- Identidade Apeperia -->
+        <div class="space-y-4">
+          <div class="inline-flex items-center gap-3">
+            <svg width="44" height="44" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="14" y="4" width="36" height="56" rx="8" stroke="currentColor" stroke-width="5"/>
+              <path d="M24 38L32 22L40 38" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="26" y1="33" x2="38" y2="33" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/>
+              <circle cx="32" cy="51" r="2.8" fill="currentColor"/>
+            </svg>
+            <span class="text-2xl font-bold" style="color: var(--heading-color);">Apeperia</span>
+          </div>
+          <p class="text-base">
+            Aplicativos sob medida para pequenos e médios empreendedores, desenvolvidos com acessibilidade para todas as pessoas.
+          </p>
+        </div>
+
+        <!-- Navegação rápida -->
+        <div class="space-y-3">
+          <h2 class="text-xl">Navegação Rápida</h2>
+          <ul class="space-y-2 list-none p-0 m-0">
+            <li><a href="#sobre" class="inline-link">Sobre a Apeperia</a></li>
+            <li><a href="#planos" class="inline-link">Nossos Planos</a></li>
+            <li><a href="#destaques" class="inline-link">Destaques e Dicas</a></li>
+            <li><a href="#diferenciais" class="inline-link">Diferenciais</a></li>
+            <li><a href="#institucional" class="inline-link">Institucional</a></li>
+            <li><a href="#contato" class="inline-link">Formulário de Contato</a></li>
+          </ul>
+        </div>
+
+        <!-- Redes sociais com ícones + texto explícito (nunca apenas ícone) -->
+        <div class="space-y-3">
+          <h2 class="text-xl">Redes Sociais</h2>
+          <ul class="space-y-3 list-none p-0 m-0">
+            <li>
+              <a href="#contato" class="btn-secondary w-full justify-start">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                </svg>
+                <span>Facebook da Apeperia</span>
+              </a>
+            </li>
+            <li>
+              <a href="#contato" class="btn-secondary w-full justify-start">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+                <span>Instagram da Apeperia</span>
+              </a>
+            </li>
+            <li>
+              <a href="#contato" class="btn-secondary w-full justify-start">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                  <rect x="2" y="9" width="4" height="12"></rect>
+                  <circle cx="4" cy="4" r="2"></circle>
+                </svg>
+                <span>LinkedIn da Apeperia</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Aviso de Conformidade com Acessibilidade para Baixa Visão -->
+      <div class="pt-6 border-t-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" style="border-top: 3px solid var(--border-color);">
+        <p class="text-base font-bold m-0">
+          Declaração de Acessibilidade: Este site foi projetado em conformidade com as diretrizes WCAG 2.1 / 2.2 Nível AAA para pessoas com baixa visão (contraste superior a 15:1, tipografia Atkinson Hyperlegible, ampliação fluida e leitura em voz alta).
+        </p>
+        <a href="#conteudo-principal" class="btn-secondary shrink-0">
+          Voltar ao topo
+        </a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
